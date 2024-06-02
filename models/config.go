@@ -18,11 +18,36 @@ func ParseConf() (Config, error) {
 }
 
 type Config struct {
-	Values         []string `json:"values"`
-	ReFresh        int      `json:"refresh"`
-	AutoUpdatePush int      `json:"autoUpdatePush"`
-	NightStartTime string   `json:"nightStartTime"`
-	NightEndTime   string   `json:"nightEndTime"`
+	Values []string `json:"values"`
+
+	ReFresh        int    `json:"refresh"`
+	AutoUpdatePush int    `json:"autoUpdatePush"`
+	NightStartTime string `json:"nightStartTime"`
+	NightEndTime   string `json:"nightEndTime"`
+
+	Keywords []string `json:"keywords"` // 关键词
+	Notify   Notify   `json:"notify"`   // 通知方式
+	Archives string   `json:"archives"` // 通知方式
+}
+
+// Notify 通知方式
+type Notify struct {
+	FeiShu   FeiShu   `json:"feishu"`
+	Telegram Telegram `json:"telegram"`
+}
+
+// FeiShu 飞书
+type FeiShu struct {
+	//Text string `json:"text"`
+	API string `json:"api"`
+}
+
+// Telegram 电报
+type Telegram struct {
+	ChatId string `json:"chat_id"`
+	//Text   string `json:"text"`
+	API   string `json:"api"`
+	Token string `json:"token"`
 }
 
 func (older Config) GetIncrement(newer Config) []string {

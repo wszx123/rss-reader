@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+	"github.com/mmcdole/gofeed"
 	"log"
 	"rss-reader/globals"
 	"rss-reader/models"
@@ -23,6 +25,7 @@ func UpdateFeeds() {
 }
 
 func UpdateFeed(url, formattedTime string) {
+	log.Printf("timer exec get: %s\n", url)
 	result, err := globals.Fp.ParseURL(url)
 	if err != nil {
 		log.Printf("Error fetching feed: %v | %v", url, err)
@@ -47,13 +50,14 @@ func UpdateFeed(url, formattedTime string) {
 			Title:       v.Title,
 			Description: v.Description,
 		})
+		Check(url, result, v)
 	}
 	globals.Lock.Lock()
 	defer globals.Lock.Unlock()
 	globals.DbMap[url] = customFeed
 }
 
-//获取feeds列表
+// GetFeeds 获取feeds列表
 func GetFeeds() []models.Feed {
 	feeds := make([]models.Feed, 0, len(globals.RssUrls.Values))
 	for _, url := range globals.RssUrls.Values {
@@ -114,4 +118,24 @@ func WatchConfigFileChanges(filePath string) {
 	}()
 
 	select {}
+}
+
+func Check(url string, result *gofeed.Feed, v *gofeed.Item) {
+	cache, cacheOk := globals.DbMap[url]
+	if !cacheOk || cache.Items[0].Link != result.Items[0].Link {
+		_, fileCacheOk := globals.Hash[v.Link]
+		if fileCacheOk {
+			return
+		}
+		// 匹配关键词
+		MatchStr(v.Title, func(msg string) {
+			// 发送通知
+			go Notify(Message{
+				Routes:  []string{FeiShuRoute, TelegramRoute},
+				Content: fmt.Sprintf("%s\n%s", msg, v.Link),
+			})
+			globals.WriteFile(globals.RssUrls.Archives, v.Link)
+			globals.Hash[v.Link] = 1
+		})
+	}
 }

@@ -1,26 +1,32 @@
 package globals
 
 import (
+	"bufio"
 	"embed"
+	"fmt"
+	"github.com/mmcdole/gofeed"
+	"log"
+	"os"
 	"rss-reader/models"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/mmcdole/gofeed"
 )
 
 var (
-	DbMap    map[string]models.Feed
-	RssUrls  models.Config
-	Upgrader = websocket.Upgrader{}
-	Lock     sync.RWMutex
+	DbMap     map[string]models.Feed
+	RssUrls   models.Config
+	Upgrader  = websocket.Upgrader{}
+	Lock      sync.RWMutex
+	MatchList = make([]string, 0)
+	Hash      = make(map[string]int)
+	Fp        = gofeed.NewParser()
 
 	//go:embed static
 	DirStatic embed.FS
 
 	HtmlContent []byte
-
-	Fp = gofeed.NewParser()
 )
 
 func Init() {
@@ -36,4 +42,47 @@ func Init() {
 	}
 
 	DbMap = make(map[string]models.Feed)
+
+	for _, keyword := range conf.Keywords {
+		MatchList = append(MatchList, keyword)
+	}
+
+	ReadFile(conf.Archives)
+}
+
+func ReadFile(filepath string) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() { // 逐行扫描
+		text := scanner.Text()
+		text = strings.TrimSpace(text)
+		if text != "" {
+			Hash[text] = 1
+		}
+	}
+}
+
+func WriteFile(filepath string, s string) {
+	// 打开文件，如果文件不存在则创建，如果存在则以追加模式打开
+	writeFile, errOpen := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	if errOpen != nil {
+		log.Fatalf("open result file err: %+v", errOpen)
+	}
+
+	if _, ok := Hash[s]; !ok {
+		_, errWrite := writeFile.WriteString(fmt.Sprintf("%s\n", s))
+		if errWrite != nil {
+			log.Println("writing to file error:", errWrite)
+		}
+	}
+
+	defer writeFile.Close()
+
 }
