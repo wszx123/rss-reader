@@ -31,6 +31,8 @@
 
 # 配置文件
 
+***注意⚠：docker-compose.yml 中端口默认是9898***
+
 配置文件位于config.json，sources是RSS订阅链接，示例如下
 
 ```json
@@ -102,10 +104,10 @@ server {
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
     location / {
-        proxy_pass  http://localhost:8080;
+        proxy_pass  http://localhost:9898;
     }
     location /ws {
-        proxy_pass http://localhost:8080/ws;
+        proxy_pass http://localhost:9898/ws;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
