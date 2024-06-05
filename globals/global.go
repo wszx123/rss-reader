@@ -76,11 +76,9 @@ func WriteFile(filepath string, s string) {
 		log.Fatalf("open result file err: %+v", errOpen)
 	}
 
-	if _, ok := Hash[s]; !ok {
-		_, errWrite := writeFile.WriteString(fmt.Sprintf("%s\n", s))
-		if errWrite != nil {
-			log.Println("writing to file error:", errWrite)
-		}
+	_, errWrite := writeFile.WriteString(fmt.Sprintf("%s\n", s))
+	if errWrite != nil {
+		log.Println("writing to file error:", errWrite)
 	}
 
 	defer writeFile.Close()

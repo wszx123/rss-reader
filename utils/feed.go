@@ -6,6 +6,7 @@ import (
 	"log"
 	"rss-reader/globals"
 	"rss-reader/models"
+	"strings"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -123,19 +124,36 @@ func WatchConfigFileChanges(filePath string) {
 func Check(url string, result *gofeed.Feed, v *gofeed.Item) {
 	cache, cacheOk := globals.DbMap[url]
 	if !cacheOk || cache.Items[0].Link != result.Items[0].Link {
-		_, fileCacheOk := globals.Hash[v.Link]
+
+		link := v.Link
+		link = strings.TrimSpace(link)
+		linkStrSplitForParam := strings.Split(link, "?")
+		if linkStrSplitForParam != nil && len(linkStrSplitForParam) != 0 {
+			link = linkStrSplitForParam[0]
+		}
+		linkStrSplitForRoute := strings.Split(link, "#")
+		if linkStrSplitForRoute != nil && len(linkStrSplitForRoute) != 0 {
+			link = linkStrSplitForRoute[0]
+		}
+
+		_, fileCacheOk := globals.Hash[link]
 		if fileCacheOk {
 			return
 		}
 		// 匹配关键词
 		MatchStr(v.Title, func(msg string) {
-			// 发送通知
-			go Notify(Message{
-				Routes:  []string{FeiShuRoute, TelegramRoute},
-				Content: fmt.Sprintf("%s\n%s", msg, v.Link),
-			})
-			globals.WriteFile(globals.RssUrls.Archives, v.Link)
-			globals.Hash[v.Link] = 1
+			_, fileCacheOk = globals.Hash[link]
+			if fileCacheOk {
+				return
+			} else {
+				globals.Hash[link] = 1
+				// 发送通知
+				go Notify(Message{
+					Routes:  []string{FeiShuRoute, TelegramRoute},
+					Content: fmt.Sprintf("%s\n%s", msg, v.Link),
+				})
+				globals.WriteFile(globals.RssUrls.Archives, link)
+			}
 		})
 	}
 }

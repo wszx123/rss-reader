@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"rss-reader/globals"
 	"strings"
+	"time"
 )
 
 const (
@@ -48,7 +49,8 @@ func Notify(msg Message) {
 				sendToFeiShu(msg)
 			}
 		case TelegramRoute:
-			if globals.RssUrls.Notify.Telegram.API != "" {
+			if globals.RssUrls.Notify.Telegram.Token != "" && globals.RssUrls.Notify.Telegram.ChatId != "" {
+				time.Sleep(1500)
 				sendToTelegram(msg)
 			}
 		default:
