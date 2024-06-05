@@ -2,7 +2,7 @@ version: "3"
 
 services:
   server:
-    image: sohanyu/rss-reader:latest
+    image: okhanyu/rss-reader:latest
     container_name: rss-reader
     restart: always
     ports:
