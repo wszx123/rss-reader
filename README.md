@@ -31,7 +31,13 @@
 
 # 配置文件
 
-***注意⚠：docker-compose.yml 中端口默认是9898***
+已提供 docker-compose 方式，可以一键完成安装启动运行 ***注意⚠：docker-compose.yml 中端口默认是9898***
+
+部署前请先配置，配置都在 config.json 中修改，使用前请先去 config.json 中增加自己飞书机器人的webhook地址 或 Telegram 的 token 和 chat_id，注意⚠️ TG api 后面的地址不要改！ https://api.telegram.org/bot${token}/sendMessage ，也就是这个${token}保持原样别动
+
+config.json 中的 refresh 单位为分钟，表示多少分钟请求一次所需的 rss 订阅源
+
+TG机器人创建和权限赋予教程请看 https://www.telegramhcn.com/article/161.html
 
 配置文件位于config.json，sources是RSS订阅链接，示例如下
 
@@ -98,9 +104,9 @@ docker-compose up -d
 ```conf
 server {
     listen 443 ssl;
-    server_name rss.lass.cc;
-    ssl_certificate  fullchain.cer;
-    ssl_certificate_key lass.cc.key;
+    server_name 域名;
+    ssl_certificate  域名证书.cer;
+    ssl_certificate_key 域名证书.key;
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
     location / {
@@ -118,7 +124,7 @@ server {
 
 server {
     listen 80;
-    server_name rss.lass.cc;
+    server_name 域名;
     rewrite ^(.*)$ https://$host$1 permanent;
 }
 ```
