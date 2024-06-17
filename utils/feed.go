@@ -140,7 +140,7 @@ func Check(url string, result *gofeed.Feed, v *gofeed.Item) {
 		if strings.Contains(link, "nodeloc.com") {
 			nodelocLinkArr := strings.Split(link, "/")
 			if nodelocLinkArr != nil && len(nodelocLinkArr) != 0 {
-				link = strings.TrimRight(link, "/"+nodelocLinkArr[len(nodelocLinkArr)-1])
+				link = strings.TrimSuffix(link, "/"+nodelocLinkArr[len(nodelocLinkArr)-1])
 			}
 		}
 
