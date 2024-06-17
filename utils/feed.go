@@ -136,6 +136,14 @@ func Check(url string, result *gofeed.Feed, v *gofeed.Item) {
 			link = linkStrSplitForRoute[0]
 		}
 
+		// 临时修改
+		if strings.Contains(link, "nodeloc.com") {
+			nodelocLinkArr := strings.Split(link, "/")
+			if nodelocLinkArr != nil && len(nodelocLinkArr) != 0 {
+				link = strings.TrimRight(link, "/"+nodelocLinkArr[len(nodelocLinkArr)-1])
+			}
+		}
+
 		_, fileCacheOk := globals.Hash[link]
 		if fileCacheOk {
 			return
