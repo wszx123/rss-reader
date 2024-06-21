@@ -87,7 +87,7 @@ nightEndTime | 日间结束时间，如 19:30:00
 克隆项目
 
 ```bash
-git clone https://github.com/okhanyu/rss-reader
+git clone https://github.com/wszx123/rss-reader
 ```
 
 进入rss-reader文件夹，运行项目
